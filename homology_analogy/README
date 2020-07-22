@@ -1,1 +1,11 @@
 This folder contains additional code and data for the classification into homologous and analogous relationships.
+-----------------------------------------------------------------------------------------------------------------
+
+* relationship_counts.csv
+  raw counts of classified relationships (relationships) into (Analogous) (Unassigned) and (HH_Homologs)
+  homologous relationships were additionally checked if they come from the same X-group (same_X) or even from the same H-group (same_XH)
+  The threshold used for assigning homology or structured domains to fragments is indicated in (Prob) which is either 50% or 90%
+  for each combination of sets of fragments (batch1 and batch2) three independent calculations were done (alignment)
+  
+* sample_sizes.csv
+  list of how many 100-mers were considered in each of the 10 derived sets
