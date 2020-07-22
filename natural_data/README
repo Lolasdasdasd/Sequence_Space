@@ -1,1 +1,11 @@
 This folder contains additional information about the natural data used.
+------------------------------------------------------------------------
+
+* aa_frequency.csv
+  amino_acid relative frequency_in_dataset absolute_count
+* considered genomes.txt
+  containing list of 4098 genomes (UP id of UniRef)
+  assigned phylum and genus name after string matching
+  1307 of these genomes were selected as representants of each genus
+* unsed_genomes.csv
+  selection of considered genomes
