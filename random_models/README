@@ -1,0 +1,3 @@
+Code to generate datasets of random models E_model A_model G_model P_model
+(F-model is done on the fly, provided in folder for deriving distance distributions
+ F1-, F2-, and F3-model provided in homology_analogy folder)
