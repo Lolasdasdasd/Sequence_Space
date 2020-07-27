@@ -1,0 +1,18 @@
+##################################################
+### How to filter genomes for similar proteins ###
+##################################################
+
+Proteomes contain many duplicates of similar proteins.
+
+Aim is:
+* keep sequence variance (small mutations)
+* get rid of obvious redundancy
+
+Different tools:
+- MMseq2 (heurisic, rather complicated to apply [createdb,..., remove tmp!])
+- kClust (no option for min sequence id, only coverage and e-value)
+
+- cd-hit (easy handling, clear file formats) <- USED METHOD
+
+for all fasta files in Bacteria data do
+./cd-hit -i <f> -o Bacteria/clean_proteome/seq_99_cov_90/<f> -c 0.99 -T 8 -aL 0.4 -sc 1 -sf 1
