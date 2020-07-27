@@ -1,1 +1,48 @@
-This folder provides the code to derive distances from the natural data set and the random models
+################################################################################
+### Code to derive distances from the natural data set and the random models ###
+################################################################################
+
+Requirements:
+* SeqAn is installed and needs to be linked
+* specific file structure of random models (see below)
+* natural protein sequence data set is stored in a directory with the name "_fastafile"
+compile by :
+
+g++ -std=c++17 -fopenmp -msse4 -O2  -I ~/lib/seqan/include -Wall -pedantic -O2 -pthread utilities.cpp CachedVectors/CompressedData.cpp CachedVector.cpp CachedVectors/SortedIndices.cpp settings.cpp binning.cpp all2all.cpp -oall2all
+
+./all2all requires 7 input parameters :
+* <lf>    : fragment length
+* <domain_size> : used for L-model, generally set to 100
+* <threads>     : threads used for alignment with SeqAn
+* <seed>        : random seed for initializing randomization processes
+* <path>        : path to fasta-file
+* <outfile>     : name of output-file
+* <1=important/2=exhaustive/3=appendix> : flavour
+  1 : natural, G-model, P-model, L-model (named D-model), T-model, A-model (sarting poitn = 0)
+  2 : A- and T-models with 4 different starting points, for different samplings
+  3 : not used
+  4 : P- and G-models with 4 different starting points, for different samplings
+
+File-structure:
+--------------
+The the <path> is of the form: <dir>/<fastafile> and indicates the location of the natural data set. 
+Relative to it, the random data sets must be located like the following directories:
+  <dir>.global0  for the A-model (with starting point 0)
+  <dir>.genome0  for the G-model
+  <dir>.dipep0   for the T-model
+  <dir>.protein0 for the P-model
+In each of these directories the random sequence data is expected to be stored in a file with the name "_fastafile"
+
+Database generation:
+--------------------
+Software is provided to generate the corresponding databases. In the subdirectory /shuffle, compile the code with:
+
+  g++ -std=c++17 shuffle.cpp ../settings.cpp ../CachedVector.cpp -oshuffle
+
+Then call :
+
+  ./shuffle <full path to DIR> <protein:P / fasta:F / all:A / equal:E> <random seed>
+
+Afterwards the directories need to be renaimed to fit the description above in File-structure.
+The code for the T-model is not provided. It is explicitly described in the Dissertation.
+The L-model does not need a seperate database.
