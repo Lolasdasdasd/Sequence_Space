@@ -1,0 +1,145 @@
+//////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                    FRAGMENT
+//////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+PATH="./"
+######################################
+### SAMPLING                       ###
+######################################
+
+PATH$ vi sampling/sample.sh
+./frag_sampling ~/seq_space/final/hcM 100  $STEP  $OFFSET > sample$i/fragments.csv 2> /dev/null
+please provide  <path>                <lf> <step> <offset>
+
+folders:
+PATH/sampling/sample0-9
+
+######################################
+### HMM Generation                 ###
+######################################
+PATH/HHblits/HHblits.sh
+please provide: <sample number> <start>
+bash PATH/HHblits/HHblits.sh <0-9> 0
+
+######################################
+### HHsearch of frags against ECOD ###
+######################################
+PATH/HHblits/frag2ECOD.sh 
+
+/ebio/abt1_share/small_projects/lweidmann/hh-suite/bin/hhsearch -i /ebio/abt1/lweidmann/seq_space/final/homology/HHblits/a3m_0/frag_109000000.a3m -d /ebio/abt1_share/toolkit_sync/databases/hh-suite/ECOD/ECOD_F70_20190225 -norealign -o test
+
+  outputs:
+     a3m_X/frag_X.a3m.frag2ecod.ecodname
+     a3m_X/frag_X.a3m.frag2ecod.hrr
+     a3m_X/frag_X.a3m.frag2ecod.list
+
+################################################
+### generates list of all domain assignments ###
+################################################
+PATH/FRAG2ECOD.sh 90 0
+please provide: <Prob> <overlap>
+goes over all 10 batches
+
+  outputs: <.assign> (for each batch, here batch 5)
+    PATH/res/frag2ecod_results_5.txt.assign
+    looks like this: (# batch position_in_file ECOD_id)
+    contains multiple assignments per fragment, each one row
+       5 1004050000
+       5 10050000 4321.1.1.8
+       5 1005050000 2003.1.2.282
+       5 1006050000 4021.1.1.2
+       5 1007050000 2004.1.1.1404
+
+/ebio/abt1/lweidmann/seq_space/final/homology/HHblits/a3m_1/frag_451010000.a3m.frag2ecod-1.1.2.27-325.1.7.39-325.1.7.25
+
+
+//////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                    RELATIONSHIP
+//////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+######################################
+### HHalign: generate relationships ##
+######################################
+<.align> f.e. HHalign/ali_0/ali_0_1.align
+
+bash HHalign.sh <int 0-9> <int 0-9>
+
+
+
+####################################################################
+### generates homologs and non_homologs (= potential convergent) ###
+####################################################################
+bash progress_all.sh (calls all align b1 b2)
+
+PATH/HHalign/progress_align.sh
+
+disects into .homologs and .non_homologs with Prob = 90%
+
+input: <.align>  f.e. HHalign/ali_0/ali_0_1.align
+
+  outputs:
+    HHalign/ali_0/ali_0_1.align.homologs
+      looks like this: (# batch1 batch2 pos1 pos2 Prob)
+        0 1 3000000 778010000 88.71
+        0 1 3000000 1051010000 72.12
+        0 1 8000000 631010000 95.04
+        0 1 16000000 95010000 75.06
+    HHalign/ali_0/ali_0_1.align.non_homologs
+      looks like this: (# batch1 batch2 pos1 pos2 Prob)
+        0 1 0 5010000 0.31
+        0 1 0 6010000 0.07
+        0 1 0 9010000 0.64
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>> ALL OTHER STEPS DONE WITH PATH/find_convergent.sh <batch1> <batch2>                         >>>
+>>> RUN ON OLT                                                                                  >>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+########################################
+### finds convergent in non_homologs ###
+########################################
+PATH/ecod_assign_non_homologs
+
+Command:
+./ecod_assign_non_homologs 
+  res/frag2ecod_results_all.txt.assign 
+  HHalign/res_0_1.non_homologs 
+  > HHalign/res_0_1.non_homologsCQP
+
+criteria for convergence:
+* both frags have an (or more) assigned domains
+* those domains are pairwise disjunct
+
+  Input:
+	please provide <.assign> <.non_homologs>
+
+  outputs: (in cout)
+        0 1 3000000 778010000 88.71 C (Convergent)
+        0 1 3000000 778010000 88.71 P (Possibly homologous X1=202, X2=202, same ECOD X-group)
+        0 1 3000000 778010000 88.71 Q (at least one of both frags not assigned)
+
+
+########################################
+### disect                           ###
+########################################
+PATH/HHalign/disectCQP.sh 
+please provide: <.non_homologsCQP>
+
+.non_homologsCQP -> .non_homologsCQP.C
+                    .non_homologsCQP.QP
+
+########################################
+### finds convergent in non_homologs ###
+########################################
+PATH/HHalign/HOMOLOGS2NW.sh
+please provide: <homologs/non_homologsCQP.C/non_homologsCQP.QP>
+
+takes file of format:
+	1 2 5010000 16020000 13.30
+	1 4 5010000 5040000 40.47
+	1 4 5010000 99040000 99.19
+outputs <homologs.NW/non_homologsCQP.C.NW/non_homologsCQP.QP.NW>
+
