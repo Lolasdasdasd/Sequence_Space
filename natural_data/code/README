@@ -1,0 +1,46 @@
+############################################################
+### How to generate natural data set from UniRef genomes ###
+############################################################
+
+# download README from UniRef, contains table of all available genomes
+# UniRef Release 2017_05, 10.5.17
+<FILE> UniRef_README.txt (9853 genomes)
+
+# obtain bacterial data
+>wget -N ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Bacteria/*[0-9].fasta.gz -P Bacteria/data
+
+# extract list of identifiers from head of all fasta files 
+<FILE> Bacteria/all_identifiers.list (6053 genomes)
+[
+ UP000000212,K8E169_CARML
+ UP000000214,K7RJ21_ACIA4
+ ...
+]
+
+# generate list of bacterial genomes from UniRef_README.txt and Bacteria/all_identifiers.list :
+<FILE> Bacteria/species2id.table.unfiltered
+[
+ Abiotrophia defectiva ATCC 49176    UP000019050_592010.fasta
+ Acaryochloris marina (strain MBIC 11017)    UP000000268_329726.fasta
+ ...
+]
+
+# filter for odd genomes
+<SCRIPT>
+> bash filter_species2id.sh
+<FILE> Bacteria/species2id.table.unfiltered.filter (4098 genomes)
+[
+ Abiotrophia UP000019050_592010.fasta
+ Acaryochloris   UP000000268_329726.fasta
+ ...
+]
+
+
+# execute script to generate working directory! .d
+# g++ random_per_genus_pick.cpp -O3 -std=c++14 -orandom_pick.exe
+<SCRIPT>
+> ./random_pick.exe Bacteria/species2id.table.unfiltered.filter <random seed> <output dir> <level of uniqueness: 1> <random offset: 0> <fasta_path_extension: data or clean_proteome/seqid_99_cov_90>
+requires fasta_files to be located in ./Bacteria/<fasta_path_extension>
+
+# <output_directory.d contains:
+<FILE> _fastafile (used as reference when calculated distances!)
